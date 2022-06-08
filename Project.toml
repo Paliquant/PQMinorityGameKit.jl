@@ -1,0 +1,7 @@
+name = "PQMinorityGameKit"
+uuid = "4f10aa86-7c05-4d18-984b-c1f507e9c08d"
+authors = ["Jeffrey Varner <jvarner@paliquant.com>"]
+version = "0.1.0"
+
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
