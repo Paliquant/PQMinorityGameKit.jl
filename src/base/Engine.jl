@@ -1,6 +1,7 @@
 
 # Basic simulation -
-function _simulation(world::PQBasicMinorityGameKitWorld, context::PQBasicMinorityGameKitSimulationContext)::Dict{Int64,DataFrame}
+function _simulation(world::PQBasicMinorityGameKitWorld, 
+    context::PQBasicMinorityGameKitSimulationContext)::Dict{Int64,DataFrame}
 
     # initialize -
     numberOfSimulationSteps = context.numberOfSimulationSteps
