@@ -10,6 +10,7 @@ mutable struct PQBasicMinorityGameKitStrategy <: PQAbstractGameAgentStrategy
 
     # data -
     strategy::Dict{String,Int}
+    score::Int
 
     # default constructor -
     PQBasicMinorityGameKitStrategy() = new()
@@ -28,8 +29,8 @@ mutable struct PQBasicMinorityGameKitAgent <: PQAbstractGameAgent
 
     # data -
     agentMemorySize::Int64
-    agentMemoryArray::Array{Int64,1}
-    agentStrategyScoreArray::Array{Int64,1}
+    agentStrategyCacheSize::Int64
+    agentStrategyArray::Array{PQBasicMinorityGameKitStrategy,1}
 
     # default constructor -
     PQBasicMinorityGameKitAgent() = new()

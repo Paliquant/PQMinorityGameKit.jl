@@ -11,12 +11,12 @@ function build(agentType::Type{T}, parameters::Dict{String,Any})::PQAbstractGame
         field_name_string = string(field_name_symbol)
         
         # check the for the key -
-        if (haskey(options,field_name_string) == false)
+        if (haskey(parameters,field_name_string) == false)
             throw(ArgumentError("dictionary is missing: $(field_name_string)"))    
         end
 
         # get the value -
-        value = options[field_name_string]
+        value = parameters[field_name_string]
 
         # set -
         setproperty!(model,field_name_symbol,value)
@@ -24,6 +24,35 @@ function build(agentType::Type{T}, parameters::Dict{String,Any})::PQAbstractGame
 
     # return -
     return model
+end
+
+function build(agentType::Type{PQBasicMinorityGameKitAgent}, 
+    parameters::Dict{String,Any})::PQBasicMinorityGameKitAgent
+
+    # build an empty basic game agent -
+    agent = eval(Meta.parse("$(agentType)()"))
+
+    # get stuff from the parameters dict -
+    m = get!(parameters,"agentMemorySize",3)            # default: 3 
+    n = get!(parameters,"agentStrategyCacheSize",10)        # default: 10
+    s = get!(parameters,"initialStrategyScore",0)       # default: 0
+
+    # set agent dimensions -
+    agent.agentMemorySize = m
+    agent.agentStrategyCacheSize = n
+    
+    # build strategy array -
+    strategyArray = Array{PQBasicMinorityGameKitStrategy,1}(undef, n)
+    strategyOptions = Dict{String,Any}()
+    strategyOptions["agentMemorySize"] = m
+    strategyOptions["initialStrategyScore"] = s
+    for i ∈ 1:n
+        strategyArray[i] = build(PQBasicMinorityGameKitStrategy,strategyOptions)
+    end
+    agent.agentStrategyArray = strategyArray
+        
+    # return -
+    return agent 
 end
 
 function build(strategyType::Type{PQBasicMinorityGameKitStrategy}, 
@@ -34,7 +63,8 @@ function build(strategyType::Type{PQBasicMinorityGameKitStrategy},
     strategy = Dict{String,Int64}()
 
     # get data from parameters -
-    m = get!(parameters, "agentMemorySize", 3);
+    m = get!(parameters, "agentMemorySize", 3)          # default: mem size = 3
+    s = get!(parameters,"initialStrategyScore", 0)      # default: score = 0
     
     # build up the strategy dictionary -
     for i ∈ 1:(2^m)
@@ -48,6 +78,7 @@ function build(strategyType::Type{PQBasicMinorityGameKitStrategy},
 
     # setup the strategyObject -
     strategyObject.strategy = strategy
+    strategyObject.score = s 
 
     # return -
     return strategyObject
