@@ -1,6 +1,19 @@
+# Abstract types -
+abstract type PQAbstractGameAgentStrategy end
 abstract type PQAbstractGameAgent end
 abstract type PQAbstractGameWorld end
 abstract type PQAbstractGameSimulationContext end
+
+
+# Basic game types below here -------------------------------------------------------------------------- #
+mutable struct PQBasicMinorityGameKitStrategy <: PQAbstractGameAgentStrategy
+
+    # data -
+    strategy::Dict{String,Int}
+
+    # default constructor -
+    PQBasicMinorityGameKitStrategy() = new()
+end
 
 mutable struct PQBasicMinorityGameKitSimulationContext <: PQAbstractGameSimulationContext
 
@@ -14,6 +27,7 @@ end
 mutable struct PQBasicMinorityGameKitAgent <: PQAbstractGameAgent
 
     # data -
+    agentMemorySize::Int64
     agentMemoryArray::Array{Int64,1}
     agentStrategyScoreArray::Array{Int64,1}
 
@@ -30,4 +44,6 @@ mutable struct PQBasicMinorityGameKitWorld <: PQAbstractGameWorld
     # default constructor -
     PQBasicMinorityGameKitWorld() = new()
 end
+
+# Basic game types above here -------------------------------------------------------------------------- #
 

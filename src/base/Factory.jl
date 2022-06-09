@@ -25,3 +25,30 @@ function build(agentType::Type{T}, parameters::Dict{String,Any})::PQAbstractGame
     # return -
     return model
 end
+
+function build(strategyType::Type{PQBasicMinorityGameKitStrategy}, 
+    parameters::Dict{String,Any})::PQBasicMinorityGameKitStrategy
+
+    # initialize -
+    strategyObject = eval(Meta.parse("$(strategyType)()")) # empty agent model -
+    strategy = Dict{String,Int64}()
+
+    # get data from parameters -
+    m = get!(parameters, "agentMemorySize", 3);
+    
+    # build up the strategy dictionary -
+    for i ∈ 1:(2^m)
+
+        # generate a key value pair - 
+        key =  Base.bin(UInt8(i), (2^m), false)
+
+        # capture this entry -
+        strategy[key] = rand([-1,1])
+    end
+
+    # setup the strategyObject -
+    strategyObject.strategy = strategy
+
+    # return -
+    return strategyObject
+end

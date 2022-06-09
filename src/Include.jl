@@ -11,5 +11,6 @@ Random.seed!(Random.make_seed())
 
 # load my codes -
 include(joinpath(_PATH_TO_BASE, "Types.jl"))
+include(joinpath(_PATH_TO_BASE, "Factory.jl"))
 
 

@@ -8,10 +8,12 @@ include("Include.jl")
 export PQAbstractGameAgent
 export PQAbstractGameWorld
 export PQAbstractGameSimulationContext
+export PQAbstractGameAgentStrategy
 
 # basic game types -
 export PQBasicMinorityGameKitAgent
 export PQBasicMinorityGameKitWorld
+export PQBasicMinorityGameKitStrategy
 export PQBasicMinorityGameKitSimulationContext
 
 # export methods -
