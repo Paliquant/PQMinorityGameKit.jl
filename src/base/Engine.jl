@@ -31,9 +31,32 @@ function _choice(buffer::Array{Int64,1}, agent::PQBasicMinorityGameKitAgent)::Tu
     return (best_strategy[key], best_strategy_index)
 end
 
-function _update(actions::Array{Int64,2}, agent::PQBasicMinorityGameKitAgent)::PQBasicMinorityGameKitAgent
+function _update(agentIndex::Int64, actions::Array{Int64,2}, 
+    agent::PQBasicMinorityGameKitAgent)::PQBasicMinorityGameKitAgent
 
+    # First: compute the total action -
+    total_action = sum(actions)
 
+    # what action did this agent take?
+    my_action = actions[agentIndex,1]             # first col is the action that I chose -
+    my_strategy_index = actions[agentIndex,2]     # second col is the index of the strategy that I picked
+    my_payoff = -1*my_action*sign(total_action)
+
+    # update the agent score -
+    current_score = agent.score
+    new_score = current_score + my_payoff
+    agent.score = new_score
+
+    # update the strategy score -
+    winner = sign(total_action)
+    if (winner == my_action)
+        
+        # Yes! I was a winner 
+        agent.agentStrategyArray[my_strategy_index].score += 1 # update the score, this was the best -
+    end
+
+    # return -
+    return agent
 end
 
 function _simulation(world::PQBasicMinorityGameKitWorld, 
@@ -72,7 +95,7 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
             a = agentArray[aᵢ]
 
             # what choice does this agent make?
-            (choice, best_strategy_index) = _choice(buffer, a)
+            (choice, best_strategy_index) = _choice(gameBuffer, a)
 
             # the choice is the first col, the strategy index that gave me that choice is in col 2
             agentChoiceArray[aᵢ,1] = choice
@@ -82,13 +105,23 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
         # update the individual agents given the collective behavior -
         for aᵢ ∈ 1:numberOfAgents
             a = agentArray[aᵢ]
-            agentArray[aᵢ] = _update(agentChoiceArray, a) 
+            agentArray[aᵢ] = _update(aᵢ, agentChoiceArray, a) 
         end
         
-        
+        # ok, so we need to update the gameBuffer -
+        tmp = gameBuffer[2:end]
+        for j ∈ 1:(m-1)
+            gameBuffer[j] = tmp[j]
+        end        
+        gameBuffer[m] = rand(-1:1)
+
+        # What are we going to capture at each time step?
+        # ...
+
         # capture the current winner -
         total_action = sum(agentChoiceArray)
         winnerArray[sᵢ] = sign(total_action)
+
     end
 
     # package the results 

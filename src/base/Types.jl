@@ -28,6 +28,7 @@ end
 mutable struct PQBasicMinorityGameKitAgent <: PQAbstractGameAgent
 
     # data -
+    score::Int64
     agentMemorySize::Int64
     agentStrategyCacheSize::Int64
     agentStrategyArray::Array{PQBasicMinorityGameKitStrategy,1}

@@ -82,10 +82,12 @@ function build(agentType::Type{PQBasicMinorityGameKitAgent},
     m = get!(parameters,"agentMemorySize",3)            # default: 3 
     n = get!(parameters,"agentStrategyCacheSize",10)    # default: 10
     s = get!(parameters,"initialStrategyScore",0)       # default: 0
+    a = get!(parameters,"initialAgentScore",0)          # default: 0
 
     # set agent dimensions -
     agent.agentMemorySize = m
     agent.agentStrategyCacheSize = n
+    agent.score = a
     
     # build strategy array -
     strategyArray = Array{PQBasicMinorityGameKitStrategy,1}(undef, n)
