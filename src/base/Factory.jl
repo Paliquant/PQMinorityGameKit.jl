@@ -1,11 +1,12 @@
-function build(agentType::Type{T}, parameters::Dict{String,Any})::PQAbstractGameAgent where T <: PQAbstractGameAgent
+function build(contextType::Type{T}, 
+    parameters::Dict{String,Any})::PQAbstractGameSimulationContext where T <: PQAbstractGameSimulationContext 
 
     # initialize -
-    model = eval(Meta.parse("$(agentType)()")) # empty agent model -
+    model = eval(Meta.parse("$(contextType)()")) # empty agent model -
 
     # for the rest of the fields, let's lookup in the dictionary.
     # error state: if the dictionary is missing a value -
-    for field_name_symbol ∈ fieldnames(agentType)
+    for field_name_symbol ∈ fieldnames(contextType)
         
         # convert the field_name_symbol to a string -
         field_name_string = string(field_name_symbol)
@@ -26,6 +27,51 @@ function build(agentType::Type{T}, parameters::Dict{String,Any})::PQAbstractGame
     return model
 end
 
+function build(worldType::Type{PQBasicMinorityGameKitWorld}, 
+    parameters::Dict{String,Any})::PQBasicMinorityGameKitWorld
+
+    # build an empty world -
+    world = eval(Meta.parse("$(worldType)()"))
+    agentArray = Array{PQBasicMinorityGameKitAgent,1}()
+
+    # configure the world -
+    numberOfAgents = get!(parameters, "numberOfAgents",25) # default: 25 agents 
+    numberOfSimulationSteps = get!(parameters, "numberOfSimulationSteps",25) # default: 25 agents 
+
+    # setup the context -> for a basic simulation, we use
+    contextParameters = Dict{String,Any}()
+    contextParameters["numberOfSimulationSteps"] = numberOfSimulationSteps
+    world.context = build(PQBasicMinorityGameKitSimulationContext, contextParameters)
+
+    # build agentArray -
+    if (haskey(parameters, "agentParametersDictArray") == true)
+
+        # we have an array of parameters for each agent -
+        agentParametersDictArray = parameters["agentParametersDictArray"]
+        for a ∈ 1:numberOfAgents
+            agent = build(PQBasicMinorityGameKitAgent, agentParametersDictArray[a])
+            push!(agentArray, agent)
+        end
+    else
+
+        # empty -
+        empty_dict =  Dict{String,Any}()
+
+        # ok: don't have parameters for the agents, use all default values -
+        for _ ∈ 1:numberOfAgents
+            agent = build(PQBasicMinorityGameKitAgent, empty_dict)
+            push!(agentArray, agent)
+        end
+    end
+
+    # setup the world -
+    world.numberOfAgents = numberOfAgents
+    world.gameAgentArray = agentArray
+
+    # return -
+    return world
+end
+
 function build(agentType::Type{PQBasicMinorityGameKitAgent}, 
     parameters::Dict{String,Any})::PQBasicMinorityGameKitAgent
 
@@ -34,7 +80,7 @@ function build(agentType::Type{PQBasicMinorityGameKitAgent},
 
     # get stuff from the parameters dict -
     m = get!(parameters,"agentMemorySize",3)            # default: 3 
-    n = get!(parameters,"agentStrategyCacheSize",10)        # default: 10
+    n = get!(parameters,"agentStrategyCacheSize",10)    # default: 10
     s = get!(parameters,"initialStrategyScore",0)       # default: 0
 
     # set agent dimensions -

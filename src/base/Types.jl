@@ -39,7 +39,8 @@ end
 mutable struct PQBasicMinorityGameKitWorld <: PQAbstractGameWorld
 
     # data -
-    gameAgentArray::Array{PQAbstractGameAgent,1}
+    numberOfAgents::Int64
+    gameAgentArray::Array{PQBasicMinorityGameKitAgent,1}
     context::PQBasicMinorityGameKitSimulationContext
 
     # default constructor -
