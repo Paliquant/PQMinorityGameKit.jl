@@ -1,3 +1,19 @@
+function _design(n::Int64)
+
+    # initialize -
+    bitStringArray = Array{String,1}()
+
+    # build the bit strings -
+    for i = 0:((2^n) - 1)
+        stmp = bitstring(i)
+        value = stmp[end - n + 1:end]
+        push!(bitStringArray, value)
+    end
+
+    # return -
+    return bitStringArray
+end
+
 function build(contextType::Type{T}, 
     parameters::Dict{String,Any})::PQAbstractGameSimulationContext where T <: PQAbstractGameSimulationContext 
 
@@ -114,11 +130,12 @@ function build(strategyType::Type{PQBasicMinorityGameKitStrategy},
     m = get!(parameters, "agentMemorySize", 3)          # default: mem size = 3
     s = get!(parameters,"initialStrategyScore", 0)      # default: score = 0
     
-    # build up the strategy dictionary -
+    # compute the array of keys -
+    keys = _design(m)
     for i ∈ 1:(2^m)
-
+        
         # generate a key value pair - 
-        key =  Base.bin(UInt8(i), (2^m), false)
+        key =  keys[i]
 
         # capture this entry -
         strategy[key] = rand([-1,1])

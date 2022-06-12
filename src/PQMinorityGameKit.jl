@@ -18,7 +18,7 @@ export PQBasicMinorityGameKitSimulationContext
 
 # export methods -
 export build
-export run
+export simulation
 
 
 end # module

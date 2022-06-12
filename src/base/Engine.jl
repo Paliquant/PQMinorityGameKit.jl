@@ -5,7 +5,7 @@ function _choice(buffer::Array{Int64,1}, agent::PQBasicMinorityGameKitAgent)::Tu
     # big picture: compute the key
     agentStrategyArray = agent.agentStrategyArray
     n = length(agentStrategyArray)
-    m = agent.memorySize
+    m = agent.agentMemorySize
     game_array = last(buffer,m)
 
     # convert this to binary (-1 => 0)
@@ -18,7 +18,7 @@ function _choice(buffer::Array{Int64,1}, agent::PQBasicMinorityGameKitAgent)::Tu
     end
 
     # which strategy should we select?
-    tmp_score_array = Array{Int64,1}(n)
+    tmp_score_array = Array{Int64,1}(undef, n)
     for i ∈ 1:n
         tmp_score_array[i] = agentStrategyArray[i].score
     end
@@ -63,13 +63,14 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
     context::PQBasicMinorityGameKitSimulationContext)::Dict{Int64,DataFrame}
 
     # initialize -
-    total_action = 0
     numberOfSimulationSteps = context.numberOfSimulationSteps
-    agentArray = world.agentArray
+    agentArray = world.gameAgentArray
     numberOfAgents = world.numberOfAgents
+    agentChoiceArray = Array{Int64,2}(undef, numberOfAgents,2)
+    winnerArray = Array{Int64,1}(undef, numberOfSimulationSteps)
+
+    # output -
     simulationStateArchive = Dict{Int64,DataFrame}()
-    agentChoiceArray = Array{Int64,2}(numberOfAgents,2)
-    winnerArray = Array{Int64,1}(numberOfSimulationSteps)
     
     # what is the longest memory for an agent?
     # we need to have the game have tghis size of memory - 
@@ -87,6 +88,16 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
 
     # main loop -
     for sᵢ ∈ 1:numberOfSimulationSteps
+
+        # setup agent table -
+        agent_table = DataFrame(
+            winners = Array{Int64,1}(),
+            choices = Array{Int64,1}(),
+            strategies = Array{Int64,1}(),
+            scores = Array{Int64,1}(),
+            memory = Array{Int64,1}(),
+            cache = Array{Int64,1}()
+        );
         
         # we have the gameBuffer, let all the agents look at the buffer, and make thier choice -
         for aᵢ ∈ 1:numberOfAgents
@@ -107,25 +118,33 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
             a = agentArray[aᵢ]
             agentArray[aᵢ] = _update(aᵢ, agentChoiceArray, a) 
         end
+    
+        # capture the data from the current time step -
+        winnerArray[sᵢ] = sign(sum(agentChoiceArray))
+
+        for aᵢ ∈ 1:numberOfAgents
         
+            results_tuple = (
+                winners = winnerArray[sᵢ],
+                choices = agentChoiceArray[aᵢ,1],
+                strategies = agentChoiceArray[aᵢ,2],
+                scores = agentArray[aᵢ].score,
+                memory = agentArray[aᵢ].agentMemorySize,
+                cache = agentArray[aᵢ].agentStrategyCacheSize
+            );
+        
+            push!(agent_table, results_tuple)
+        end
+
+        simulationStateArchive[sᵢ] = agent_table
+
         # ok, so we need to update the gameBuffer -
         tmp = gameBuffer[2:end]
-        for j ∈ 1:(m-1)
+        for j ∈ 1:(gameMemorySize-1)
             gameBuffer[j] = tmp[j]
         end        
-        gameBuffer[m] = rand(-1:1)
-
-        # What are we going to capture at each time step?
-        # ...
-
-        # capture the current winner -
-        total_action = sum(agentChoiceArray)
-        winnerArray[sᵢ] = sign(total_action)
-
+        gameBuffer[gameMemorySize] = rand(-1:1)
     end
-
-    # package the results 
-    # ...
 
     # return -
     return simulationStateArchive
@@ -133,7 +152,7 @@ end
 
 
 # this method dispatches to context specific simulation impls -
-function run(world::T)::Dict{Int64,DataFrame} where T <: PQAbstractGameWorld
+function simulation(world::T)::Dict{Int64,DataFrame} where T <: PQAbstractGameWorld
 
     # get context -
     context = world.context

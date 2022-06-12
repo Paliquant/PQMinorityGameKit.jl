@@ -74,6 +74,13 @@ function run_basic_agent_object_build_test()
     return false
 end
 
+function run_basic_game_world_build_test()
+
+    
+
+
+end
+
 @testset "default_test_set" begin
     @test run_default_test() == true
     @test run_basic_agent_strategy_build_test() == true
