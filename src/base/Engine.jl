@@ -54,8 +54,6 @@ function _update(agentIndex::Int64, actions::Array{Int64,2},
         old_score = agent.agentStrategyArray[my_strategy_index].score
         new_score = old_score + 1
         agent.agentStrategyArray[my_strategy_index].score = new_score
-
-        @show (agentIndex, winner, my_action, old_score, new_score)
        
     else 
 
@@ -75,7 +73,7 @@ function _update(agentIndex::Int64, actions::Array{Int64,2},
 end
 
 function _simulation(world::PQBasicMinorityGameKitWorld, 
-    context::PQBasicMinorityGameKitSimulationContext)::Dict{Int64,DataFrame}
+    context::PQBasicMinorityGameKitSimulationContext)
 
     # initialize -
     numberOfSimulationSteps = context.numberOfSimulationSteps
@@ -86,6 +84,7 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
 
     # output -
     simulationStateArchive = Dict{Int64,DataFrame}()
+    simulationStrategyArchive = Dict{Int64,DataFrame}()
     
     # what is the longest memory for an agent?
     # we need to have the game have tghis size of memory - 
@@ -114,6 +113,14 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
             cache = Array{Int64,1}()
         );
         
+        # setup the strategy table -
+        strategy_table = DataFrame(
+            agentid = Int64[],
+            strategyid = Int64[],
+            table = Dict{String,Int}(),
+            score = Int64[]
+        );  
+
         # we have the gameBuffer, let all the agents look at the buffer, and make thier choice -
         for aᵢ ∈ 1:numberOfAgents
             
@@ -147,10 +154,36 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
                 memory = agentArray[aᵢ].agentMemorySize,
                 cache = agentArray[aᵢ].agentStrategyCacheSize
             );
-        
             push!(agent_table, results_tuple)
+
+            # for this agent, grab the strategy -
+            strategyArray = agentArray[aᵢ].agentStrategyArray
+            n = length(strategyArray)
+
+            # generate the keys again -
+            m = agentArray[aᵢ]. agentMemorySize
+            keys = _design(m)
+
+            for j ∈ 1:n
+                
+                # get the strategy -
+                strategy = strategyArray[j]
+                
+                # what score does this strategy have?
+                s = strategy.score
+
+                # build the results tuple -
+                results_tuple_strategy = (
+                    agentid = aᵢ,
+                    strategyid = j,
+                    score = s,
+                    table = strategy.strategy
+                );
+                push!(strategy_table, results_tuple_strategy)
+            end
         end
         simulationStateArchive[sᵢ] = agent_table
+        simulationStrategyArchive[sᵢ] = strategy_table
 
         # ok, so we need to update the gameBuffer -
         tmp = gameBuffer[2:end]
@@ -161,12 +194,12 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
     end
 
     # return -
-    return simulationStateArchive
+    return (simulationStateArchive, simulationStrategyArchive)
 end
 
 
 # this method dispatches to context specific simulation impls -
-function simulation(world::T)::Dict{Int64,DataFrame} where T <: PQAbstractGameWorld
+function simulation(world::T) where T <: PQAbstractGameWorld
 
     # get context -
     context = world.context

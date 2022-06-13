@@ -5,7 +5,7 @@ function run_basic_simulation()
 
     # hardcode some data -
     numberOfAgents = 25
-    numberOfSimulationSteps = 100
+    numberOfSimulationSteps = 1000
 
     # setup the parameter values -
     world_parameters = Dict{String,Any}()
@@ -18,9 +18,9 @@ function run_basic_simulation()
         
         # setup agent parameters -
         agent_parameters = Dict{String,Any}()
-        agent_parameters["agentMemorySize"] = 5
-        agent_parameters["agentStrategyCacheSize"] = 10
-        agent_parameters["initialStrategyScore"] = rand(0:100)
+        agent_parameters["agentMemorySize"] = 6
+        agent_parameters["agentStrategyCacheSize"] = 100
+        agent_parameters["initialStrategyScore"] = 0
         agent_parameters["initialAgentScore"] = 0
         push!(agentParametersDictArray,agent_parameters)
     end
@@ -35,4 +35,4 @@ function run_basic_simulation()
 end
 
 # uncomment me to run standalone test -
-bws = run_basic_simulation()
+(bws,st) = run_basic_simulation()
