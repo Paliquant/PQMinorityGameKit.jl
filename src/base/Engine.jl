@@ -35,7 +35,7 @@ function _update(agentIndex::Int64, actions::Array{Int64,2},
     agent::PQBasicMinorityGameKitAgent)::PQBasicMinorityGameKitAgent
 
     # First: compute the total action -
-    total_action = sum(actions)
+    total_action = sum(actions[:,1])
 
     # what action did this agent take?
     my_action = actions[agentIndex,1]             # first col is the action that I chose -
@@ -44,15 +44,20 @@ function _update(agentIndex::Int64, actions::Array{Int64,2},
 
     # update the agent score -
     current_score = agent.score
-    new_score = current_score + my_payoff
+    new_score = current_score - my_payoff
     agent.score = new_score
 
     # update the strategy score -
     winner = sign(total_action)
     if (winner == my_action)
         
-        # Yes! I was a winner 
-        agent.agentStrategyArray[my_strategy_index].score += 1 # update the score, this was the best -
+        @show (winner, my_action, my_strategy_index)
+
+        # get old score -
+        old_score = agent.agentStrategyArray[my_strategy_index].score
+        new_score = old_score + 1
+        agent.agentStrategyArray[my_strategy_index].score = new_score
+       
     end
 
     # return -
@@ -91,10 +96,10 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
 
         # setup agent table -
         agent_table = DataFrame(
-            winners = Array{Int64,1}(),
-            choices = Array{Int64,1}(),
-            strategies = Array{Int64,1}(),
-            scores = Array{Int64,1}(),
+            winner = Array{Int64,1}(),
+            choice = Array{Int64,1}(),
+            strategy = Array{Int64,1}(),
+            score = Array{Int64,1}(),
             memory = Array{Int64,1}(),
             cache = Array{Int64,1}()
         );
@@ -121,21 +126,19 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
     
         # capture the data from the current time step -
         winnerArray[sᵢ] = sign(sum(agentChoiceArray))
-
         for aᵢ ∈ 1:numberOfAgents
         
             results_tuple = (
-                winners = winnerArray[sᵢ],
-                choices = agentChoiceArray[aᵢ,1],
-                strategies = agentChoiceArray[aᵢ,2],
-                scores = agentArray[aᵢ].score,
+                winner = winnerArray[sᵢ],
+                choice = agentChoiceArray[aᵢ,1],
+                strategy = agentChoiceArray[aᵢ,2],
+                score = agentArray[aᵢ].score,
                 memory = agentArray[aᵢ].agentMemorySize,
                 cache = agentArray[aᵢ].agentStrategyCacheSize
             );
         
             push!(agent_table, results_tuple)
         end
-
         simulationStateArchive[sᵢ] = agent_table
 
         # ok, so we need to update the gameBuffer -

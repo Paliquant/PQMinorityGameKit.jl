@@ -20,7 +20,7 @@ function run_basic_simulation()
         agent_parameters = Dict{String,Any}()
         agent_parameters["agentMemorySize"] = 5
         agent_parameters["agentStrategyCacheSize"] = 10
-        agent_parameters["initialStrategyScore"] = 0
+        agent_parameters["initialStrategyScore"] = rand(0:100)
         agent_parameters["initialAgentScore"] = 0
         push!(agentParametersDictArray,agent_parameters)
     end
