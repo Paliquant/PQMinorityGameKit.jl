@@ -110,7 +110,7 @@ function build(agentType::Type{PQBasicMinorityGameKitAgent},
         
         strategyOptions = Dict{String,Any}()
         strategyOptions["agentMemorySize"] = m
-        strategyOptions["initialStrategyScore"] = rand(0:10)
+        strategyOptions["initialStrategyScore"] = 0
         strategyArray[i] = build(PQBasicMinorityGameKitStrategy, strategyOptions)
     end
     agent.agentStrategyArray = strategyArray
@@ -128,7 +128,7 @@ function build(strategyType::Type{PQBasicMinorityGameKitStrategy},
 
     # get data from parameters -
     m = get!(parameters, "agentMemorySize", 3)          # default: mem size = 3
-    s = get!(parameters,"initialStrategyScore", rand(0:100))      # default: random 
+    s = get!(parameters,"initialStrategyScore", 0)      # default: random 
     
     # compute the array of keys -
     keys = _design(m)

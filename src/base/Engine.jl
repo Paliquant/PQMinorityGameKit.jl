@@ -38,26 +38,36 @@ function _update(agentIndex::Int64, actions::Array{Int64,2},
     total_action = sum(actions[:,1])
 
     # what action did this agent take?
-    my_action = actions[agentIndex,1]             # first col is the action that I chose -
-    my_strategy_index = actions[agentIndex,2]     # second col is the index of the strategy that I picked
-    my_payoff = -1*my_action*sign(total_action)
-
-    # update the agent score -
-    current_score = agent.score
-    new_score = current_score - my_payoff
-    agent.score = new_score
-
+    my_action = actions[agentIndex, 1]             # first col is the action that I chose -
+    my_strategy_index = actions[agentIndex, 2]     # second col is the index of the strategy that I picked
+    
     # update the strategy score -
     winner = sign(total_action)
     if (winner == my_action)
-        
-        @show (winner, my_action, my_strategy_index)
 
+        # update the agent score -
+        current_score = agent.score
+        new_score = current_score + 1
+        agent.score = new_score
+        
         # get old score -
         old_score = agent.agentStrategyArray[my_strategy_index].score
         new_score = old_score + 1
         agent.agentStrategyArray[my_strategy_index].score = new_score
+
+        @show (agentIndex, winner, my_action, old_score, new_score)
        
+    else 
+
+        # update the agent score -
+        current_score = agent.score
+        new_score = current_score - 1
+        agent.score = new_score
+
+        # this strategy was a looser. Vote down. 
+        old_score = agent.agentStrategyArray[my_strategy_index].score
+        new_score = old_score - 1
+        agent.agentStrategyArray[my_strategy_index].score = new_score
     end
 
     # return -
@@ -71,7 +81,7 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
     numberOfSimulationSteps = context.numberOfSimulationSteps
     agentArray = world.gameAgentArray
     numberOfAgents = world.numberOfAgents
-    agentChoiceArray = Array{Int64,2}(undef, numberOfAgents,2)
+    agentChoiceArray = Array{Int64,2}(undef, numberOfAgents, 2)
     winnerArray = Array{Int64,1}(undef, numberOfSimulationSteps)
 
     # output -
@@ -120,12 +130,13 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
     
         # update the individual agents given the collective behavior -
         for aᵢ ∈ 1:numberOfAgents
-            a = agentArray[aᵢ]
-            agentArray[aᵢ] = _update(aᵢ, agentChoiceArray, a) 
+            old_a = agentArray[aᵢ]
+            new_a = _update(aᵢ, agentChoiceArray, old_a)
+            agentArray[aᵢ] =  new_a
         end
     
         # capture the data from the current time step -
-        winnerArray[sᵢ] = sign(sum(agentChoiceArray))
+        winnerArray[sᵢ] = sign(sum(agentChoiceArray[:,1]))
         for aᵢ ∈ 1:numberOfAgents
         
             results_tuple = (
