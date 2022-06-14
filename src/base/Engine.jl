@@ -77,10 +77,16 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
 
     # initialize -
     numberOfSimulationSteps = context.numberOfSimulationSteps
+    Sₒ = context.Sₒ
+    λ = context.λ
     agentArray = world.gameAgentArray
     numberOfAgents = world.numberOfAgents
     agentChoiceArray = Array{Int64,2}(undef, numberOfAgents, 2)
     winnerArray = Array{Int64,1}(undef, numberOfSimulationSteps)
+
+    # initialize the price array -
+    asset_price_array = Array{Float64,1}(undef,numberOfSimulationSteps+1)
+    asset_price_array[1] = Sₒ
 
     # output -
     simulationStateArchive = Dict{Int64,DataFrame}()
@@ -100,8 +106,21 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
         gameBuffer[i] = rand([-1,1])
     end
 
+    # initialize the world table -
+    world_table = DataFrame(
+        time = Int64[],
+        price = Float64[]
+    );
+
     # main loop -
     for sᵢ ∈ 1:numberOfSimulationSteps
+
+        # capture the world state -
+        world_state_tuple = (
+            time = sᵢ,
+            price = asset_price_array[sᵢ]
+        );
+        push!(world_table, world_state_tuple)
 
         # setup agent table -
         agent_table = DataFrame(
@@ -159,11 +178,6 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
             # for this agent, grab the strategy -
             strategyArray = agentArray[aᵢ].agentStrategyArray
             n = length(strategyArray)
-
-            # generate the keys again -
-            m = agentArray[aᵢ]. agentMemorySize
-            keys = _design(m)
-
             for j ∈ 1:n
                 
                 # get the strategy -
@@ -191,10 +205,13 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
             gameBuffer[j] = tmp[j]
         end        
         gameBuffer[gameMemorySize] = rand(-1:1)
+
+        # compute the next price -
+        asset_price_array[sᵢ + 1] = asset_price_array[sᵢ] + (1/λ)*sum(agentChoiceArray[:,1])
     end
 
     # return -
-    return (simulationStateArchive, simulationStrategyArchive)
+    return (simulationStateArchive, simulationStrategyArchive, world_table)
 end
 
 

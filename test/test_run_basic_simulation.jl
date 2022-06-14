@@ -11,6 +11,8 @@ function run_basic_simulation()
     world_parameters = Dict{String,Any}()
     world_parameters["numberOfSimulationSteps"] = numberOfSimulationSteps;
     world_parameters["numberOfAgents"] = numberOfAgents
+    world_parameters["Sₒ"] = 4.49
+    world_parameters["λ"] = 1000.0
 
     # initialize agent information -
     agentParametersDictArray = Array{Dict{String,Any},1}()
@@ -35,4 +37,4 @@ function run_basic_simulation()
 end
 
 # uncomment me to run standalone test -
-(bws,st) = run_basic_simulation()
+(bws,st, wt) = run_basic_simulation()
