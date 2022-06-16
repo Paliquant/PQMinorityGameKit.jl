@@ -207,7 +207,7 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
         gameBuffer[gameMemorySize] = rand(-1:1)
 
         # compute the next price -
-        asset_price_array[sᵢ + 1] = asset_price_array[sᵢ] + (1/λ)*sum(agentChoiceArray[:,1])
+        asset_price_array[sᵢ + 1] = asset_price_array[sᵢ]*exp((1/λ)*sum(agentChoiceArray[:,1]))
     end
 
     # return -

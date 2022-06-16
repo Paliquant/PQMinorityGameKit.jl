@@ -11,8 +11,8 @@ function run_basic_simulation()
     world_parameters = Dict{String,Any}()
     world_parameters["numberOfSimulationSteps"] = numberOfSimulationSteps;
     world_parameters["numberOfAgents"] = numberOfAgents
-    world_parameters["Sₒ"] = 4.49
-    world_parameters["λ"] = 1000.0
+    world_parameters["Sₒ"] = 1.0
+    world_parameters["λ"] = 10000.0
 
     # initialize agent information -
     agentParametersDictArray = Array{Dict{String,Any},1}()
@@ -37,4 +37,17 @@ function run_basic_simulation()
 end
 
 # uncomment me to run standalone test -
-(bws,st, wt) = run_basic_simulation()
+number_of_trials = 10
+numberOfSimulationSteps = 1000
+PA = Array{Float64,2}(undef, numberOfSimulationSteps, (number_of_trials+1))
+for t ∈ 1:number_of_trials
+    
+    # run the simulation -
+    (bws,st, wt) = run_basic_simulation()
+
+    # copy: price data into PA -
+    for s ∈ 1:numberOfSimulationSteps
+        global PA[s,1] = wt[s,1]
+        global PA[s,t+1] = wt[s,2]
+    end
+end
