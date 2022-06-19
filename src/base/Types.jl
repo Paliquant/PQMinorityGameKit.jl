@@ -22,6 +22,7 @@ mutable struct PQBasicMinorityGameKitSimulationContext <: PQAbstractGameSimulati
     numberOfSimulationSteps::Int64
     Sₒ::Float64     # initial share price 
     λ::Float64      # liqudity parameter
+    p::Float64      # market bias parameters 
 
     # default constructor -
     PQBasicMinorityGameKitSimulationContext() = new()

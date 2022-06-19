@@ -79,10 +79,14 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
     numberOfSimulationSteps = context.numberOfSimulationSteps
     Sₒ = context.Sₒ
     λ = context.λ
+    p = context.p
     agentArray = world.gameAgentArray
     numberOfAgents = world.numberOfAgents
     agentChoiceArray = Array{Int64,2}(undef, numberOfAgents, 2)
     winnerArray = Array{Int64,1}(undef, numberOfSimulationSteps)
+
+    # Initialize market -
+    d = Bernoulli(p)
 
     # initialize the price array -
     asset_price_array = Array{Float64,1}(undef,numberOfSimulationSteps+1)
@@ -103,7 +107,8 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
     # initialize the game buffer with random values -
     gameBuffer = Array{Int64,1}(undef, gameMemorySize)
     for i ∈ 1:gameMemorySize
-        gameBuffer[i] = rand([-1,1])
+        value = (rand(d) == true ? 1 : -1)
+        gameBuffer[i] = value
     end
 
     # initialize the world table -
@@ -203,8 +208,8 @@ function _simulation(world::PQBasicMinorityGameKitWorld,
         tmp = gameBuffer[2:end]
         for j ∈ 1:(gameMemorySize-1)
             gameBuffer[j] = tmp[j]
-        end        
-        gameBuffer[gameMemorySize] = rand(-1:1)
+        end       
+        gameBuffer[gameMemorySize] = (rand(d) == true ? 1 : -1)
 
         # compute the next price -
         asset_price_array[sᵢ + 1] = asset_price_array[sᵢ]*exp((1/λ)*sum(agentChoiceArray[:,1]))

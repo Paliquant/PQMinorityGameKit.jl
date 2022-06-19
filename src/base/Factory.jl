@@ -55,12 +55,14 @@ function build(worldType::Type{PQBasicMinorityGameKitWorld},
     numberOfSimulationSteps = get!(parameters, "numberOfSimulationSteps",25) # default: 25 agents 
     Sₒ = get!(parameters, "Sₒ", 1.0)
     λ = get!(parameters, "λ", 10.0)
+    p = get!(parameters,"p",0.5)
 
     # setup the context -> for a basic simulation, we use
     contextParameters = Dict{String,Any}()
     contextParameters["numberOfSimulationSteps"] = numberOfSimulationSteps
     contextParameters["Sₒ"] = Sₒ
     contextParameters["λ"] = λ
+    contextParameters["p"] = p
     world.context = build(PQBasicMinorityGameKitSimulationContext, contextParameters)
 
     # build agentArray -

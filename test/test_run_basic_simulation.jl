@@ -12,7 +12,8 @@ function run_basic_simulation()
     world_parameters["numberOfSimulationSteps"] = numberOfSimulationSteps;
     world_parameters["numberOfAgents"] = numberOfAgents
     world_parameters["Sₒ"] = 1.0
-    world_parameters["λ"] = 10000.0
+    world_parameters["λ"] = 1000.0
+    world_parameters["p"] = 0.90
 
     # initialize agent information -
     agentParametersDictArray = Array{Dict{String,Any},1}()
@@ -37,8 +38,8 @@ function run_basic_simulation()
 end
 
 # uncomment me to run standalone test -
-number_of_trials = 10
-numberOfSimulationSteps = 1000
+number_of_trials = 100
+numberOfSimulationSteps = 100
 PA = Array{Float64,2}(undef, numberOfSimulationSteps, (number_of_trials+1))
 for t ∈ 1:number_of_trials
     
